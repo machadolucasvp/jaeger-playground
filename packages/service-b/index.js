@@ -8,6 +8,6 @@ fastify.get('/', (request, reply) => {
     reply.send({ message })
 })
 
-fastify.listen(process.env.SERVER_PORT, (err) => {
+fastify.listen(process.env.SERVER_PORT, '0.0.0.0', (err) => {
     if (err) throw err
 })
