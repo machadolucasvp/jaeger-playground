@@ -9,5 +9,25 @@ services:
       - "16686:16686"
     networks:
       - jaeger-playground
+  service-a:
+    container_name: service-a
+    build:
+      context: ./packages/service-a
+    environment:
+      - SERVER_PORT=80
+    ports:
+      - '8001:80'
+    networks:
+      - jaeger-playground
+  service-b:
+    container_name: service-b
+    build:
+      context: ./packages/service-b
+    environment:
+      - SERVER_PORT=80
+    ports:
+      - '8002:80'
+    networks:
+      - jaeger-playground
 networks:
   jaeger-playground:
