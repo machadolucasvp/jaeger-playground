@@ -10,6 +10,7 @@
   "author": "Lucas Machado",
   "license": "MIT",
   "dependencies": {
+    "axios": "^0.21.1",
     "fastify": "^3.15.1",
     "jaeger-client": "^3.18.1",
     "opentracing": "^0.14.5"
