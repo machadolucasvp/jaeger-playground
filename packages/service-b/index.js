@@ -5,10 +5,11 @@ const fastify = require('fastify')({
 const Tracer = require('./src/config/tracer')
 const { FORMAT_HTTP_HEADERS } = require('opentracing')
 
-const tracer = Tracer.getTracer('service-b')
+const serviceName = 'service-b'
+const tracer = Tracer.getTracer(serviceName)
 
 fastify.get('/', (request, reply) => {
-    const message = 'service-b is alive!'
+    const message = `${serviceName} is alive!`
     request.log.info(message)
     reply.send({ message })
 })
@@ -17,7 +18,7 @@ fastify.get('/downstream', (request, reply) => {
     const parentSpanContext = tracer.extract(FORMAT_HTTP_HEADERS, request.headers)
     const span = tracer.startSpan('downstream', { childOf: parentSpanContext })
 
-    const helloFromMessage = 'hello from service-b'
+    const helloFromMessage = `hello from ${serviceName}`
     span.log({
         'event': 'ping-downstream',
         'value': helloFromMessage

@@ -1,5 +1,4 @@
 require('dotenv').config()
-const logger = require('./src/helpers/logger')
 
 const fastify = require('fastify')({
     logger: true
@@ -8,10 +7,11 @@ const Tracer = require('./src/config/tracer')
 const axios = require('./src/config/axios')
 const { Tags, FORMAT_HTTP_HEADERS } = require('opentracing')
 
-const tracer = Tracer.getTracer('service-a')
+const serviceName = 'service-a'
+const tracer = Tracer.getTracer(serviceName)
 
 fastify.get('/', (request, reply) => {
-    const message = 'service-a is alive!'
+    const message = `${serviceName} is alive!`
     const span = tracer.startSpan('health-check')
 
     request.log.info(message)
@@ -25,12 +25,17 @@ fastify.get('/downstream', async (request, reply) => {
 
     tracer.inject(span, FORMAT_HTTP_HEADERS, headers)
     try {
-        const { status, data } = await axios.apiServiceB.get('/downstream', { headers })
+        const [responseServiceB, responseServiceC] = await Promise.all([
+            axios.apiServiceB.get('/downstream', { headers }),
+            axios.apiServiceC.get('/downstream', { headers })
+        ])
 
-        request.log.info(`service-b response ${data}`)
-        span.setTag(Tags.HTTP_STATUS_CODE, status)
+        request.log.info(`service-b response ${responseServiceB.data}`)
+        request.log.info(`service-c response ${responseServiceC.data}`)
 
-        reply.send({ status, data })
+        span.setTag(Tags.HTTP_STATUS_CODE, 200)
+
+        reply.send({ responseServiceB, responseServiceC })
     } catch (err) {
         request.log.error(err)
         span.setTag(Tags.ERROR, true)
