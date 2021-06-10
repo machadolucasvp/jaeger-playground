@@ -1,3 +1,6 @@
+require('dotenv').config()
+const logger = require('./src/helpers/logger')
+
 const fastify = require('fastify')({
     logger: true
 })
