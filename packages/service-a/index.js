@@ -20,7 +20,7 @@ fastify.get('/', (request, reply) => {
 })
 
 fastify.get('/downstream', async (request, reply) => {
-    const span = tracer.startSpan('downstream')
+    const span = tracer.startSpan('request-downstream')
     const headers = {}
 
     tracer.inject(span, FORMAT_HTTP_HEADERS, headers)
@@ -32,10 +32,19 @@ fastify.get('/downstream', async (request, reply) => {
 
         request.log.info(`service-b response ${responseServiceB.data}`)
         request.log.info(`service-c response ${responseServiceC.data}`)
-
+        console.log('aqui')
         span.setTag(Tags.HTTP_STATUS_CODE, 200)
 
-        reply.send({ responseServiceB, responseServiceC })
+        reply.send({
+            responseServiceB: {
+                status: responseServiceB.status,
+                data: responseServiceB.data
+            },
+            responseServiceC: {
+                status: responseServiceC.status,
+                data: responseServiceC.data
+            }
+        })
     } catch (err) {
         request.log.error(err)
         span.setTag(Tags.ERROR, true)
